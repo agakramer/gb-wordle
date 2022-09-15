@@ -10,12 +10,6 @@
 select_word:
     ld  de, current_word
     
-    ld a, %0001010
-    ld [random_number], a
-    ld a, %00000000
-    ld [random_number+1], a
-    
-    
     ld  a, [random_number+0]
     and %00011111
     ld  h, a
