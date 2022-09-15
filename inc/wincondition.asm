@@ -30,7 +30,7 @@ check_guess:
 
 .test_lose:
     ld  a, [current_guess]
-    cp  a, 6
+    cp  a, 5
     jp  nz, .reset
     call init_state_lost
     jp  .return
