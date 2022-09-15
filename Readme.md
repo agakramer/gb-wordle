@@ -1,14 +1,14 @@
 Wordle
 ======
 
-In this game, a word with five letters has to be guessed. For this purpose, six words can be tried. After each attempt, every letter is shown whether it is not present, present and in the right place, or present but not in the right place.
+In this game, a word with five letters has to be guessed. For this purpose, six words can be tried. After each attempt, every character is shown whether it is not present, present and in the right place, or present but not in the right place.
 
 
 Controls
 ---------
 ```
 START       Starts a new game
-SELECT      Selects a letter
+SELECT      Confirms the entered word
 → ↓ ← ↑     Moves the cursor
 A           Selects a character
 B           Deletes the last character
