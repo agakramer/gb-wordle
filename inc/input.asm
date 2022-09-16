@@ -23,9 +23,10 @@ update_cursor_objects:
     ld  b, $09
     call multiply_ab
     add a, c
+    inc a
     
-    ; char 26 doesn't exist, it's the enter sign
-    cp  a, 26
+    ; char 27 doesn't exist, it's the enter sign
+    cp  a, 27
     jp  nz, .not_enter
     ld  a, TILE_ENTER
 .not_enter:
@@ -198,11 +199,12 @@ select_letter:
     ld  b, 9
     call multiply_ab
     add a, d
+    inc a
     ld  c, a
     
     ; check if it's enter
     ld  a, c
-    cp  a, 26
+    cp  a, 27
     jp  nz, .normal_letter
     call check_guess
     jp  .return

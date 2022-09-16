@@ -8,12 +8,12 @@ STATE_LOST              EQU %00000100
 STATE_WON               EQU %00001100
 
 ; Marker for invalid or undefined values
-NULL                    EQU $1c
+NULL                    EQU $00
 
 ;; Indices of special tiles
-TILE_BLACK              EQU $1a
-TILE_WHITE              EQU $1b
 TILE_NULL               EQU NULL
+TILE_BLACK              EQU $1b
+TILE_WHITE              EQU $1c
 TILE_PLACEHOLDER        EQU $1d
 TILE_ENTER              EQU $1e
 TILE_RIGHT              EQU $1f
@@ -156,14 +156,14 @@ include "inc/interrupts.asm"
 SECTION "DATA0", ROM0[$1000]
 ; Tiles
 tiles_start:
+tile_null:
+    include "tiles/plain-null.asm"
 tiles_alphabet:
     include "tiles/alphabet.asm"
 tile_black:
     include "tiles/plain-black.asm"
 tile_white:
     include "tiles/plain-white.asm"
-tile_null:
-    include "tiles/plain-null.asm"
 tiles_placeholder:
     include "tiles/sign-placeholder.asm"
 tiles_enter:
@@ -207,29 +207,29 @@ message_clear:
   DB $00, $00, $00, $00
 
 message_unknown:
-  DB $7a, $38, 20, OBJ_ATTR_PALETTE1 ; U
-  DB $7a, $40, 13, OBJ_ATTR_PALETTE1 ; N
-  DB $7a, $48, 10, OBJ_ATTR_PALETTE1 ; k
-  DB $7a, $50, 13, OBJ_ATTR_PALETTE1 ; N
-  DB $7a, $58, 14, OBJ_ATTR_PALETTE1 ; O
-  DB $7a, $60, 22, OBJ_ATTR_PALETTE1 ; W
-  DB $7a, $68, 13, OBJ_ATTR_PALETTE1 ; N
+  DB $7a, $38, 21, OBJ_ATTR_PALETTE1 ; U
+  DB $7a, $40, 14, OBJ_ATTR_PALETTE1 ; N
+  DB $7a, $48, 11, OBJ_ATTR_PALETTE1 ; k
+  DB $7a, $50, 14, OBJ_ATTR_PALETTE1 ; N
+  DB $7a, $58, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $7a, $60, 23, OBJ_ATTR_PALETTE1 ; W
+  DB $7a, $68, 14, OBJ_ATTR_PALETTE1 ; N
   DB $00, $00,  0, 0
 
 message_won:
-  DB $7a, $38, 24, OBJ_ATTR_PALETTE1 ; Y
-  DB $7a, $40, 14, OBJ_ATTR_PALETTE1 ; O
-  DB $7a, $48, 20, OBJ_ATTR_PALETTE1 ; U
-  DB $7a, $58, 22, OBJ_ATTR_PALETTE1 ; W
-  DB $7a, $60, 14, OBJ_ATTR_PALETTE1 ; O
-  DB $7a, $68, 13, OBJ_ATTR_PALETTE1 ; N
+  DB $7a, $38, 25, OBJ_ATTR_PALETTE1 ; Y
+  DB $7a, $40, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $7a, $48, 21, OBJ_ATTR_PALETTE1 ; U
+  DB $7a, $58, 23, OBJ_ATTR_PALETTE1 ; W
+  DB $7a, $60, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $7a, $68, 14, OBJ_ATTR_PALETTE1 ; N
   DB $00, $00,  0, 0
   DB $00, $00,  0, 0
   
 message_lost:
-  DB $7a, $30,  8, OBJ_ATTR_PALETTE1 ; I
-  DB $7a, $38, 19, OBJ_ATTR_PALETTE1 ; T
-  DB $7a, $40, 18, OBJ_ATTR_PALETTE1 ; S
+  DB $7a, $30,  9, OBJ_ATTR_PALETTE1 ; I
+  DB $7a, $38, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $7a, $40, 19, OBJ_ATTR_PALETTE1 ; S
   DB $7a, $50,  0, OBJ_ATTR_PALETTE1 ; guess[0]
   DB $7a, $58,  0, OBJ_ATTR_PALETTE1 ; guess[1]
   DB $7a, $60,  0, OBJ_ATTR_PALETTE1 ; guess[2]
