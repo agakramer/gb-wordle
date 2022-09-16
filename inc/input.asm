@@ -115,8 +115,11 @@ handle_input_game:
     jp  z, .check_left
     ld  a, d
     cp  a, $08
-    jp  z, .check_left
+    jp  z, .overflow_right
     inc d
+    jp  .check_left
+.overflow_right:
+    ld  d, 0
 
 .check_left:
     ld  a, c
@@ -124,8 +127,11 @@ handle_input_game:
     jp  z, .check_up
     ld  a, d
     cp  a, 0
-    jp  z, .check_up
+    jp  z, .overflow_left
     dec d
+    jp  .check_up
+.overflow_left:
+    ld  d, 8
 
 .check_up:
     ld  a, c
@@ -133,8 +139,11 @@ handle_input_game:
     jp  z, .check_down
     ld  a, e
     cp  a, 0
-    jp  z, .check_down
+    jp  z, .overflow_up
     dec e
+    jp  .check_down
+.overflow_up:
+    ld  e, 2
 
 .check_down:
     ld  a, c
@@ -142,8 +151,11 @@ handle_input_game:
     jp  z, .check_a
     ld  a, e
     cp  a, $02
-    jp  z, .check_a
+    jp  z, .overflow_down
     inc e
+    jp  .check_a
+.overflow_down:
+    ld  e, 0
 
 .check_a:
     ld  a, c
