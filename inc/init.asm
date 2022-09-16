@@ -19,7 +19,61 @@ init_state_menu:
          + OBJ_DISPLAY_ON  + OBJ_SIZE_8X8
     ld  [LCD_CONTROL_REGISTER], a
     ret
+
+
+
+; Initialise everything for help screen
+init_state_help:
+    ld a, STATE_HELP
+    ld [current_state], a
     
+    ; turn the screen off
+    ld  a, DISPLAY_OFF
+    ld  [LCD_CONTROL_REGISTER], a
+    
+    call clear_message
+    
+    ; set the background position
+    ld  a, 0
+    ld  [BKG_POS_X_REGISTER], a
+    ld  a, $9a
+    ld  [BKG_POS_Y_REGISTER], a
+    
+    ; set the window position
+    ld  a, 3
+    ld  [WND_POS_X_REGISTER], a
+    ld  a, $70
+    ld  [WND_POS_Y_REGISTER], a
+
+    ld  hl, window_help
+    call load_window_map
+    
+    ; set a fixed game state
+    ld  hl, current_word
+    ld  de, help_word
+    ld  c, 65
+.set_gamestate:
+    ld  a, [de]
+    ld  [hl], a
+    inc de
+    inc hl
+    dec c
+    jp  nz, .set_gamestate
+
+    ; This is only possible because the memory space of these
+    ; two variables is located directly after each other.
+
+    call update_hint_markings
+    call update_guess_objects
+    
+    ; turn the screen on
+    ld  a, DISPLAY_ON + TLS_USE_LOC_8000 \
+         + BKG_DISPLAY_ON + BKG_USE_LOC_9800 \
+         + WND_DISPLAY_ON + WND_USE_LOC_9C00 \
+         + OBJ_DISPLAY_ON + OBJ_SIZE_8X8
+    ld  [LCD_CONTROL_REGISTER], a
+    ret
+
 
 
 ; Initialise everything for the main game state
@@ -28,7 +82,12 @@ init_state_game:
     ld a, STATE_GAME
     ld [current_state], a
 
+    ; turn the screen off
+    ld  a, DISPLAY_OFF
+    ld  [LCD_CONTROL_REGISTER], a
+
     call select_word
+    call clear_message
 
     ; set the background position
     ld  a, 0
@@ -39,11 +98,12 @@ init_state_game:
     ; set the window position
     ld  a, 3
     ld  [WND_POS_X_REGISTER], a
-    ld  a, $5e
+    ld  a, $70
     ld  [WND_POS_Y_REGISTER], a
     
-    ; clear messages
-    call clear_message
+    ; load the window data
+    ld  hl, window_game
+    call load_window_map
     
     ; initialise some more variables
     ld  a, 0
@@ -151,17 +211,17 @@ load_background_map:
 
 
 ; Load the window map into the vram
+; -> hl 
 load_window_map:
-    ld  bc, window
-    ld  hl, WND_LOC_9C00
+    ld  bc, WND_LOC_9C00
     ld  d, 32
     ld  e, 4
 
 .loop:
-    ld  a, [bc]
-    ld [hl], a
-    inc bc
+    ld  a, [hl]
+    ld [bc], a
     inc hl
+    inc bc
 
     dec d
     jp  nz, .loop

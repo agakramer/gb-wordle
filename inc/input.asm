@@ -49,9 +49,10 @@ handle_input_menu:
     and a, INPUT_UP | INPUT_DOWN
     jp  z, .check_confirm
     ld  a, [sub_state]
-    xor a, %00000001 ; flip the last bit
+    ; flip the corresponding bits
+    xor a, STATE_MENU_START + STATE_MENU_HELP
     ld  [sub_state], a
-    and a, %00000001
+    and a, STATE_MENU_START
     jp  z, .switch_to_help
 .switch_to_start
     call show_message_menu_start
@@ -64,7 +65,6 @@ handle_input_menu:
     ld  a, c
     and a, INPUT_START | INPUT_A
     jp  z, .return
-    
     ld  a, [sub_state]
     and a, STATE_MENU_START
     jp  z, .help_selected
@@ -72,7 +72,18 @@ handle_input_menu:
     call init_state_game
     jp  .return
 .help_selected
+    call init_state_help
     jp  .return
+.return
+    ret
+
+
+
+handle_input_help:
+    ld  a, c
+    and a, INPUT_START
+    jp  z, .return
+    call init_state_game
 .return
     ret
 
@@ -264,7 +275,7 @@ update_cursor_objects:
     ld  a, [selected_letter_y]
     ld  b, $08
     call multiply_ab
-    add a, $86
+    add a, $80
     ld  [hl+], a
 
     ; horizontal position
@@ -294,3 +305,4 @@ update_cursor_objects:
     ld  a, OBJ_ATTR_PALETTE1
     ld  [hl+], a
     ret
+
