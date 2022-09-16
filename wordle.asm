@@ -3,22 +3,26 @@ include "inc/constants.asm"
 ;; Game specific constants
 ; Game states
 STATE_MENU              EQU %00000001
-STATE_GAME              EQU %00000010
-STATE_LOST              EQU %00000100
-STATE_WON               EQU %00001100
+STATE_MENU_START        EQU %01000000
+STATE_MENU_HELP         EQU %10000000
+STATE_HELP              EQU %00000010
+STATE_GAME              EQU %00000100
+STATE_LOST              EQU %00001000
+STATE_WON               EQU %00011000
 
 ; Marker for invalid or undefined values
-NULL                    EQU $1c
+NULL                    EQU $00
 
 ;; Indices of special tiles
-TILE_BLACK              EQU $1a
-TILE_WHITE              EQU $1b
 TILE_NULL               EQU NULL
+TILE_BLACK              EQU $1b
+TILE_WHITE              EQU $1c
 TILE_PLACEHOLDER        EQU $1d
 TILE_ENTER              EQU $1e
 TILE_RIGHT              EQU $1f
 TILE_MISPLACED          EQU $20
 TILE_WRONG              EQU $21
+TILE_SLASH              EQU $22
 
 
 
@@ -61,7 +65,6 @@ main:
     ; load the video data
     call init_palettes
     call load_tiles
-    call load_window_map
     call load_background_map
 
     ; initialise the objects
@@ -101,8 +104,16 @@ main_loop:
 
 .in_menu:
     cp  a, STATE_MENU
-    jp  nz, .in_game
+    jp  nz, .in_help
     call handle_input_menu
+    jp  .cleanup
+
+.in_help:
+    cp  a, STATE_HELP
+    jp  nz, .in_game
+    call handle_input_help
+    call update_hint_markings
+    call update_guess_objects
     jp  .cleanup
 
 .in_game:
@@ -156,14 +167,14 @@ include "inc/interrupts.asm"
 SECTION "DATA0", ROM0[$1000]
 ; Tiles
 tiles_start:
+tile_null:
+    include "tiles/plain-null.asm"
 tiles_alphabet:
     include "tiles/alphabet.asm"
 tile_black:
     include "tiles/plain-black.asm"
 tile_white:
     include "tiles/plain-white.asm"
-tile_null:
-    include "tiles/plain-null.asm"
 tiles_placeholder:
     include "tiles/sign-placeholder.asm"
 tiles_enter:
@@ -174,6 +185,8 @@ tile_misplaced:
     include "tiles/sign-misplaced.asm"
 tiles_wrong:
     include "tiles/sign-wrong.asm"
+tiles_slash:
+    include "tiles/sign-slash.asm"
 tiles_logo:
     include "tiles/logo.asm"
 tiles_end:
@@ -184,8 +197,10 @@ tiles_end:
 maps_start:
 background:
     include "maps/background.asm"
-window:
-    include "maps/window.asm"
+window_help:
+    include "maps/window-help.asm"
+window_game:
+    include "maps/window-game.asm"
 maps_end:
 
 dictionary:
@@ -193,6 +208,26 @@ dictionary:
 dictionary_end:
     DB
 
+
+; Help data
+help_word:
+  DB $12, $09, $07, $08, $14 ; right
+
+help_guess:
+  DB $06, $01, $15, $0c, $14 ; fault
+  DB $07, $09, $12, $14, $08 ; girth
+  DB $12, $09, $07, $08, $14 ; right
+  DB $0f, $0e, $0c, $19, $00 ; only
+  DB $13, $09, $18, $00, $00 ; six
+  DB $14, $12, $09, $05, $13 ; tries
+
+help_guess_hints:
+  DB TILE_WRONG,     TILE_WRONG,     TILE_WRONG,     TILE_WRONG,     TILE_RIGHT
+  DB TILE_MISPLACED, TILE_MISPLACED, TILE_MISPLACED, TILE_MISPLACED, TILE_MISPLACED
+  DB TILE_RIGHT,     TILE_RIGHT,     TILE_RIGHT,     TILE_RIGHT,     TILE_RIGHT
+  DB TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE
+  DB TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE
+  DB TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE
 
 
 ; Messages
@@ -205,36 +240,62 @@ message_clear:
   DB $00, $00, $00, $00
   DB $00, $00, $00, $00
   DB $00, $00, $00, $00
+  DB $00, $00, $00, $00
+
+message_menu_start:
+  DB $88, $30, 19, OBJ_ATTR_PALETTE1 ; S
+  DB $88, $38, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $88, $40, 01, OBJ_ATTR_PALETTE1 ; A
+  DB $88, $48, 18, OBJ_ATTR_PALETTE1 ; R
+  DB $88, $50, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $88, $60, 07, OBJ_ATTR_PALETTE1 ; G
+  DB $88, $68, 01, OBJ_ATTR_PALETTE1 ; A
+  DB $88, $70, 13, OBJ_ATTR_PALETTE1 ; M
+  DB $88, $78, 05, OBJ_ATTR_PALETTE1 ; E
+
+message_menu_help:
+  DB $90, $30, 08, OBJ_ATTR_PALETTE1 ; H
+  DB $90, $38, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $90, $40, 23, OBJ_ATTR_PALETTE1 ; W
+  DB $90, $50, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $90, $58, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $90, $68, 16, OBJ_ATTR_PALETTE1 ; P
+  DB $90, $70, 12, OBJ_ATTR_PALETTE1 ; L
+  DB $90, $78, 01, OBJ_ATTR_PALETTE1 ; A
+  DB $90, $80, 25, OBJ_ATTR_PALETTE1 ; Y
 
 message_unknown:
-  DB $7a, $38, 20, OBJ_ATTR_PALETTE1 ; U
-  DB $7a, $40, 13, OBJ_ATTR_PALETTE1 ; N
-  DB $7a, $48, 10, OBJ_ATTR_PALETTE1 ; k
-  DB $7a, $50, 13, OBJ_ATTR_PALETTE1 ; N
-  DB $7a, $58, 14, OBJ_ATTR_PALETTE1 ; O
-  DB $7a, $60, 22, OBJ_ATTR_PALETTE1 ; W
-  DB $7a, $68, 13, OBJ_ATTR_PALETTE1 ; N
+  DB $74, $38, 21, OBJ_ATTR_PALETTE1 ; U
+  DB $74, $40, 14, OBJ_ATTR_PALETTE1 ; N
+  DB $74, $48, 11, OBJ_ATTR_PALETTE1 ; k
+  DB $74, $50, 14, OBJ_ATTR_PALETTE1 ; N
+  DB $74, $58, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $74, $60, 23, OBJ_ATTR_PALETTE1 ; W
+  DB $74, $68, 14, OBJ_ATTR_PALETTE1 ; N
+  DB $00, $00,  0, 0
   DB $00, $00,  0, 0
 
 message_won:
-  DB $7a, $38, 24, OBJ_ATTR_PALETTE1 ; Y
-  DB $7a, $40, 14, OBJ_ATTR_PALETTE1 ; O
-  DB $7a, $48, 20, OBJ_ATTR_PALETTE1 ; U
-  DB $7a, $58, 22, OBJ_ATTR_PALETTE1 ; W
-  DB $7a, $60, 14, OBJ_ATTR_PALETTE1 ; O
-  DB $7a, $68, 13, OBJ_ATTR_PALETTE1 ; N
+  DB $74, $38, 25, OBJ_ATTR_PALETTE1 ; Y
+  DB $74, $40, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $74, $48, 21, OBJ_ATTR_PALETTE1 ; U
+  DB $74, $58, 23, OBJ_ATTR_PALETTE1 ; W
+  DB $74, $60, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $74, $68, 14, OBJ_ATTR_PALETTE1 ; N
+  DB $00, $00,  0, 0
   DB $00, $00,  0, 0
   DB $00, $00,  0, 0
   
 message_lost:
-  DB $7a, $30,  8, OBJ_ATTR_PALETTE1 ; I
-  DB $7a, $38, 19, OBJ_ATTR_PALETTE1 ; T
-  DB $7a, $40, 18, OBJ_ATTR_PALETTE1 ; S
-  DB $7a, $50,  0, OBJ_ATTR_PALETTE1 ; guess[0]
-  DB $7a, $58,  0, OBJ_ATTR_PALETTE1 ; guess[1]
-  DB $7a, $60,  0, OBJ_ATTR_PALETTE1 ; guess[2]
-  DB $7a, $68,  0, OBJ_ATTR_PALETTE1 ; guess[3]
-  DB $7a, $70,  0, OBJ_ATTR_PALETTE1 ; guess[4]
+  DB $74, $30,  9, OBJ_ATTR_PALETTE1 ; I
+  DB $74, $38, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $74, $40, 19, OBJ_ATTR_PALETTE1 ; S
+  DB $74, $50,  0, OBJ_ATTR_PALETTE1 ; guess[0]
+  DB $74, $58,  0, OBJ_ATTR_PALETTE1 ; guess[1]
+  DB $74, $60,  0, OBJ_ATTR_PALETTE1 ; guess[2]
+  DB $74, $68,  0, OBJ_ATTR_PALETTE1 ; guess[3]
+  DB $74, $70,  0, OBJ_ATTR_PALETTE1 ; guess[4]
+  DB $00, $00,  0, 0
 
 
 
@@ -248,7 +309,7 @@ obj_selected_letter:
 obj_guess_letters:
     DS 120
 obj_message_letters:
-    DS 32
+    DS 36
 obj_end:
 obj_dma_padding:
     DS 160 - (obj_end - obj_start)
@@ -270,9 +331,9 @@ input_state:
 current_state:
     DB
 
-; Saves the current word
-current_word:
-    DS 5
+; Saves the state in the submenu
+sub_state:
+    DB
 
 ; Number of the current guess
 current_guess:
@@ -281,6 +342,10 @@ current_guess:
 ; Position within the current guess
 current_char:
     DB
+
+; Saves the current word
+current_word:
+    DS 5
 
 ; The guess attempts
 guesses:

@@ -1,43 +1,3 @@
-; Update the object data for the alphabet cursor
-update_cursor_objects:
-    ld  hl, obj_selected_letter
-
-    ; vertical position
-    ld  a, [selected_letter_y]
-    ld  b, $08
-    call multiply_ab
-    add a, $86
-    ld  [hl+], a
-
-    ; horizontal position
-    ld  a, [selected_letter_x]
-    ld  b, $10
-    call multiply_ab
-    add a, $14
-    ld  [hl+], a
-
-    ; tile index
-    ld  a, [selected_letter_x]
-    ld  c, a
-    ld  a, [selected_letter_y]
-    ld  b, $09
-    call multiply_ab
-    add a, c
-    
-    ; char 26 doesn't exist, it's the enter sign
-    cp  a, 26
-    jp  nz, .not_enter
-    ld  a, TILE_ENTER
-.not_enter:
-    ld  [hl+], a
-
-    ; attributes
-    ld  a, OBJ_ATTR_PALETTE1
-    ld  [hl+], a
-    ret
-
-
-
 ; Read the current input state
 ; -> b: current keystates
 ; -> c: changed keys since last read
@@ -84,12 +44,47 @@ read_input:
 
 ; React on input within the menu
 handle_input_menu:
+.check_movement:
+    ld  a, c
+    and a, INPUT_UP | INPUT_DOWN
+    jp  z, .check_confirm
+    ld  a, [sub_state]
+    ; flip the corresponding bits
+    xor a, STATE_MENU_START + STATE_MENU_HELP
+    ld  [sub_state], a
+    and a, STATE_MENU_START
+    jp  z, .switch_to_help
+.switch_to_start
+    call show_message_menu_start
+    jp  .check_confirm
+.switch_to_help
+    call show_message_menu_help
+    jp  .check_confirm
+
+.check_confirm
+    ld  a, c
+    and a, INPUT_START | INPUT_A
+    jp  z, .return
+    ld  a, [sub_state]
+    and a, STATE_MENU_START
+    jp  z, .help_selected
+.start_selected
+    call init_state_game
+    jp  .return
+.help_selected
+    call init_state_help
+    jp  .return
+.return
+    ret
+
+
+
+handle_input_help:
     ld  a, c
     and a, INPUT_START
-    jp  z, .nothing
+    jp  z, .return
     call init_state_game
-
-.nothing
+.return
     ret
 
 
@@ -198,11 +193,12 @@ select_letter:
     ld  b, 9
     call multiply_ab
     add a, d
+    inc a
     ld  c, a
     
     ; check if it's enter
     ld  a, c
-    cp  a, 26
+    cp  a, 27
     jp  nz, .normal_letter
     call check_guess
     jp  .return
@@ -267,5 +263,46 @@ delete_letter:
     pop bc
     pop af
     pop hl
+    ret
+
+
+
+; Update the object data for the alphabet cursor
+update_cursor_objects:
+    ld  hl, obj_selected_letter
+
+    ; vertical position
+    ld  a, [selected_letter_y]
+    ld  b, $08
+    call multiply_ab
+    add a, $80
+    ld  [hl+], a
+
+    ; horizontal position
+    ld  a, [selected_letter_x]
+    ld  b, $10
+    call multiply_ab
+    add a, $14
+    ld  [hl+], a
+
+    ; tile index
+    ld  a, [selected_letter_x]
+    ld  c, a
+    ld  a, [selected_letter_y]
+    ld  b, $09
+    call multiply_ab
+    add a, c
+    inc a
+    
+    ; char 27 doesn't exist, it's the enter sign
+    cp  a, 27
+    jp  nz, .not_enter
+    ld  a, TILE_ENTER
+.not_enter:
+    ld  [hl+], a
+
+    ; attributes
+    ld  a, OBJ_ATTR_PALETTE1
+    ld  [hl+], a
     ret
 

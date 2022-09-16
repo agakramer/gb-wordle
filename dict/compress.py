@@ -13,13 +13,13 @@ def compress(in_path: str, out_path:str):
             if len(set(list(word))) != len(word):
                 continue
 
-            a = (((ord(word[0])-0x61) << 2) & 0x00fc) | \
-                (((ord(word[1])-0x61) >> 4) & 0x0003)     
-            b = (((ord(word[1])-0x61) << 4) & 0x00f0) | \
-                (((ord(word[2])-0x61) >> 2) & 0x000f)     
-            c = (((ord(word[2])-0x61) << 6) & 0x00c0) | \
-                (((ord(word[3])-0x61) >> 0) & 0x003f);
-            d = (((ord(word[4])-0x61) << 2) & 0x00fc)
+            a = (((ord(word[0])-0x60) << 2) & 0x00fc) | \
+                (((ord(word[1])-0x60) >> 4) & 0x0003)     
+            b = (((ord(word[1])-0x60) << 4) & 0x00f0) | \
+                (((ord(word[2])-0x60) >> 2) & 0x000f)     
+            c = (((ord(word[2])-0x60) << 6) & 0x00c0) | \
+                (((ord(word[3])-0x60) >> 0) & 0x003f);
+            d = (((ord(word[4])-0x60) << 2) & 0x00fc)
 
             pack = struct.pack("BBBB", a, b, c, d)
             data.write(pack)
