@@ -2,17 +2,21 @@
 init_state_menu:
     ld a, STATE_MENU
     ld [current_state], a
+    ld a, STATE_MENU_START
+    ld [sub_state], a
     
     ; set the background position
     ld  a, 0
     ld  [BKG_POS_X_REGISTER], a
     ld  [BKG_POS_Y_REGISTER], a
     
+    call show_message_menu_start
+    
     ; turn the screen on
     ld  a, DISPLAY_ON + TLS_USE_LOC_8000 \
-         + BKG_DISPLAY_ON + BKG_USE_LOC_9800 \
+         + BKG_DISPLAY_ON  + BKG_USE_LOC_9800 \
          + WND_DISPLAY_OFF + WND_USE_LOC_9C00 \
-         + OBJ_DISPLAY_OFF + OBJ_SIZE_8X8
+         + OBJ_DISPLAY_ON  + OBJ_SIZE_8X8
     ld  [LCD_CONTROL_REGISTER], a
     ret
     
@@ -37,6 +41,9 @@ init_state_game:
     ld  [WND_POS_X_REGISTER], a
     ld  a, $5e
     ld  [WND_POS_Y_REGISTER], a
+    
+    ; clear messages
+    call clear_message
     
     ; initialise some more variables
     ld  a, 0
@@ -64,7 +71,7 @@ init_state_game:
     jp  nz, .loop2
     
     ; turn the screen on
-    ld  a, DISPLAY_ON + TLS_USE_LOC_8000 \
+    ld  a, DISPLAY_ON     + TLS_USE_LOC_8000 \
          + BKG_DISPLAY_ON + BKG_USE_LOC_9800 \
          + WND_DISPLAY_ON + WND_USE_LOC_9C00 \
          + OBJ_DISPLAY_ON + OBJ_SIZE_8X8
@@ -148,7 +155,7 @@ load_window_map:
     ld  bc, window
     ld  hl, WND_LOC_9C00
     ld  d, 32
-    ld  e, 32
+    ld  e, 4
 
 .loop:
     ld  a, [bc]

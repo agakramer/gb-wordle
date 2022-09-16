@@ -3,6 +3,8 @@ include "inc/constants.asm"
 ;; Game specific constants
 ; Game states
 STATE_MENU              EQU %00000001
+STATE_MENU_START        EQU %01000001
+STATE_MENU_HELP         EQU %10000001
 STATE_GAME              EQU %00000010
 STATE_LOST              EQU %00000100
 STATE_WON               EQU %00001100
@@ -205,6 +207,29 @@ message_clear:
   DB $00, $00, $00, $00
   DB $00, $00, $00, $00
   DB $00, $00, $00, $00
+  DB $00, $00, $00, $00
+
+message_menu_start:
+  DB $88, $30, 19, OBJ_ATTR_PALETTE1 ; S
+  DB $88, $38, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $88, $40, 01, OBJ_ATTR_PALETTE1 ; A
+  DB $88, $48, 18, OBJ_ATTR_PALETTE1 ; R
+  DB $88, $50, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $88, $60, 07, OBJ_ATTR_PALETTE1 ; G
+  DB $88, $68, 01, OBJ_ATTR_PALETTE1 ; A
+  DB $88, $70, 13, OBJ_ATTR_PALETTE1 ; G
+  DB $88, $78, 05, OBJ_ATTR_PALETTE1 ; A
+
+message_menu_help:
+  DB $90, $30, 08, OBJ_ATTR_PALETTE1 ; H
+  DB $90, $38, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $90, $40, 23, OBJ_ATTR_PALETTE1 ; W
+  DB $90, $50, 20, OBJ_ATTR_PALETTE1 ; T
+  DB $90, $58, 15, OBJ_ATTR_PALETTE1 ; O
+  DB $90, $68, 16, OBJ_ATTR_PALETTE1 ; P
+  DB $90, $70, 12, OBJ_ATTR_PALETTE1 ; L
+  DB $90, $78, 01, OBJ_ATTR_PALETTE1 ; A
+  DB $90, $80, 25, OBJ_ATTR_PALETTE1 ; Y
 
 message_unknown:
   DB $7a, $38, 21, OBJ_ATTR_PALETTE1 ; U
@@ -215,6 +240,7 @@ message_unknown:
   DB $7a, $60, 23, OBJ_ATTR_PALETTE1 ; W
   DB $7a, $68, 14, OBJ_ATTR_PALETTE1 ; N
   DB $00, $00,  0, 0
+  DB $00, $00,  0, 0
 
 message_won:
   DB $7a, $38, 25, OBJ_ATTR_PALETTE1 ; Y
@@ -223,6 +249,7 @@ message_won:
   DB $7a, $58, 23, OBJ_ATTR_PALETTE1 ; W
   DB $7a, $60, 15, OBJ_ATTR_PALETTE1 ; O
   DB $7a, $68, 14, OBJ_ATTR_PALETTE1 ; N
+  DB $00, $00,  0, 0
   DB $00, $00,  0, 0
   DB $00, $00,  0, 0
   
@@ -235,6 +262,7 @@ message_lost:
   DB $7a, $60,  0, OBJ_ATTR_PALETTE1 ; guess[2]
   DB $7a, $68,  0, OBJ_ATTR_PALETTE1 ; guess[3]
   DB $7a, $70,  0, OBJ_ATTR_PALETTE1 ; guess[4]
+  DB $00, $00,  0, 0
 
 
 
@@ -268,6 +296,10 @@ input_state:
 
 ; Saves the current game state
 current_state:
+    DB
+
+; Saves the state in the submenu
+sub_state:
     DB
 
 ; Saves the current word

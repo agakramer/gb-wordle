@@ -1,3 +1,21 @@
+; Highlights the menu entry "start game"
+show_message_menu_start:
+    ld  de, message_menu_start
+    ld  b, 0
+    call show_message
+    ret
+
+
+
+; Highlights the menu entry "how it works"
+show_message_menu_help:
+    ld  de, message_menu_help
+    ld  b, 0
+    call show_message
+    ret
+
+
+
 ; Inform that the current guess is not in the dictionary
 show_message_unknown:
     ld  de, message_unknown
@@ -43,8 +61,12 @@ ENDR
 ; <- de
 ; <- b
 show_message:
+    push hl
+    push bc
+    push de
+
     ld hl, obj_message_letters
-    ld c, 32
+    ld c, 36
 .loop:
     ld  a, [de]
     ld  [hl], a
@@ -55,6 +77,10 @@ show_message:
     
     ld  a, b
     ld  [message_timeout], a
+    
+    pop de
+    pop bc
+    pop hl
     ret
 
 
