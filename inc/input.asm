@@ -212,7 +212,7 @@ handle_input_after:
 ; -> e: y position of the cursor
 ; <- [current_guess]
 ; <- [current_char]
-; <- [guesses]
+; <- [guess_attempts]
 select_letter:
     push hl
     push af
@@ -235,7 +235,7 @@ select_letter:
     jp  .return
 
 .normal_letter:
-    ld  hl, guesses
+    ld  hl, guess_attempts
     ld  a, [current_guess]
     ld  b, 5
     call multiply_ab
@@ -265,14 +265,14 @@ select_letter:
 ; Delete the last entered letter
 ; <- [current_guess]
 ; <- [current_char]
-; <- [guesses]
+; <- [guess_attempts]
 delete_letter:
     push hl
     push af
     push bc
     push de
 
-    ld  hl, guesses
+    ld  hl, guess_attempts
     ld  a, [current_guess]
     ld  b, 5
     call multiply_ab

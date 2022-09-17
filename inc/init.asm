@@ -153,8 +153,8 @@ init_state_game:
     ld  [current_guess], a
     ld  [current_char], a
     
-.reset_guesses
-    ld  hl, guesses
+.reset_guess_attempts
+    ld  hl, guess_attempts
     ld  a, NULL
     ld  d, 30
 .loop1:
@@ -163,7 +163,7 @@ init_state_game:
     jp  nz, .loop1
 
 .reset_hints
-    ld  hl, guesses_hints
+    ld  hl, guess_hints
     ld  a, TILE_WHITE
     ld  d, 30
 .loop2:

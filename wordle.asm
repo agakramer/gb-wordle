@@ -372,11 +372,11 @@ current_word:
     DS 5
 
 ; The guess attempts
-guesses:
+guess_attempts:
     DS 30
 
 ; The corresponding hints
-guesses_hints:
+guess_hints:
     DS 30
 
 ; Message timeout (remaining number of frames)

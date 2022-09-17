@@ -8,12 +8,12 @@
 
 ; Updates the background layer with the obtained hints.
 ; Note: a row within the background map consists of 32 tiles
-; -> [guesses_hints]
+; -> [guess_hints]
 ; <- [BKG_LOC_9800]
 update_hint_markings:
     ; calculate the
     ld  hl, BKG_LOC_9800 + 32*20 + 6
-    ld  de, guesses_hints
+    ld  de, guess_hints
     
     ld  b, 6
 .loop_outer:

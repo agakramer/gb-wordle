@@ -7,11 +7,11 @@
 
 
 ; Updates the objects of the entered characters
-; -> [guesses]
+; -> [guess_attempts]
 ; <- [obj_guess_letters]
 update_guess_objects:
     ld  hl, obj_guess_letters
-    ld  de, guesses
+    ld  de, guess_attempts
 
     ld  a, $14
     call update_guess_row
@@ -100,7 +100,7 @@ get_guess_offset:
     call multiply_ab
     ld  b, 0
     ld  c, a
-    ld  hl, guesses
+    ld  hl, guess_attempts
     add hl, bc
     ret
 
