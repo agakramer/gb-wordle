@@ -1,4 +1,14 @@
+;; ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+;; ██░███░█▀▄▄▀█░▄▄▀█░▄▀█░██░▄▄██
+;; ██░█░█░█░██░█░▀▀▄█░█░█░██░▄▄██
+;; ██▄▀▄▀▄██▄▄██▄█▄▄█▄▄██▄▄█▄▄▄██
+;; ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+;; The famous word puzzle
+
+; Include hardware-specific constants
+; used all over the code.
 include "inc/constants.asm"
+
 
 ;; Game specific constants
 ; Game states
@@ -28,22 +38,22 @@ TILE_SLASH              EQU $22
 
 ; Vertical blanking interrupt starting address
 SECTION "ENTRY_VBLANK", ROM0[$0040]
-    jp int_vblank
+    jp int_vblank ; used for game logic updates
 
 
 ; LCDC status interrupt starting address
 SECTION "ENTRY_LCDCS", ROM0[$0048]
-    reti
+    reti ; we don't use this interrupt
 
 
 ; Timer overflow interrupt starting address
 SECTION "ENTRY_TIMER", ROM0[$0050]
-    jp int_timer
+    jp int_timer ; used for generating randomness
 
 
 ; Serial transfer completion interrupt starting address
 SECTION "ENTRY_SERIAL", ROM0[$0058]
-    reti
+    reti ; we don't use this interrupt
 
 
 ; Program starting address
@@ -54,7 +64,8 @@ SECTION "ENTRY_START", ROM0[$0100]
 
 SECTION "MAIN", ROM0[$0150]
 main:
-    ; turn the screen off until everything is initialised
+    ; turn the screen off until everything is initialized,
+    ; or wild glitches will appear
     ld  a, DISPLAY_OFF
     ld  [LCD_CONTROL_REGISTER], a
     ld  [LCD_STATUS_REGISTER], a
@@ -99,7 +110,6 @@ main_loop:
 .within_vblank:
     call update_oam
     call read_input
-    
     ld  a, [current_state]
 
 .in_menu:
@@ -156,7 +166,6 @@ include "inc/dict.asm"
 include "inc/input.asm"
 include "inc/guess.asm"
 include "inc/hints.asm"
-include "inc/search.asm"
 include "inc/messages.asm"
 include "inc/wincondition.asm"
 include "inc/interrupts.asm"
@@ -165,7 +174,10 @@ include "inc/interrupts.asm"
 
 ;; Game data
 SECTION "DATA0", ROM0[$1000]
-; Tiles
+
+;; Tiles
+; Small 8x8 pixel images, which are addressable
+; and will be used for sprite maps and objects.
 tiles_start:
 tile_null:
     include "tiles/plain-null.asm"
@@ -192,8 +204,9 @@ tiles_logo:
 tiles_end:
 
 
-
-; Maps
+;; Maps
+; Each map defines a grid of tile addresses,
+; which combined will form the desired image.
 maps_start:
 background:
     include "maps/background.asm"
@@ -203,13 +216,20 @@ window_game:
     include "maps/window-game.asm"
 maps_end:
 
+
+;; Dictionary
+; A list of known words to choose from.
 dictionary:
     incbin "dict/en.dat"
 dictionary_end:
-    DB
 
 
-; Help data
+;; Help data
+; The help screen will reuse the normal
+; game mechanics to provide a manual
+; how to play this game.
+; Now following is hard coded-data
+; to provide a set of information.
 help_word:
   DB $12, $09, $07, $08, $14 ; right
 
@@ -230,7 +250,11 @@ help_guess_hints:
   DB TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE,     TILE_WHITE
 
 
-; Messages
+;; Messages
+; This game uses a message system to
+; provide feedback to the user.
+; For this, nine objects are reserved
+; and can be used at will.
 message_clear:
   DB $00, $00, $00, $00
   DB $00, $00, $00, $00
@@ -299,7 +323,7 @@ message_lost:
 
 
 
-; Address reservations within the working ram
+;; Address reservations within the working ram
 SECTION "RAM", WRAM0
 ; The first 160 Bytes are reserved for a copy
 ; of the OAM data, which will be updated via DMA.
@@ -319,7 +343,7 @@ obj_dma_padding:
 vblank_flag:
     DB
 
-; Saves the current 16bit random number
+; Saves the current random number consisting of 16 bits
 random_number:
     DS 2
 
@@ -327,19 +351,19 @@ random_number:
 input_state:
     DB
 
-; Saves the current game state
+; Saves the current game state (see STATE constants)
 current_state:
     DB
 
-; Saves the state in the submenu
+; Saves the subordinate state (see STATE constants)
 sub_state:
     DB
 
-; Number of the current guess
+; Number of the current guess (0..5)
 current_guess:
     DB
 
-; Position within the current guess
+; Position within the current guess (0..4)
 current_char:
     DB
 
@@ -350,19 +374,20 @@ current_word:
 ; The guess attempts
 guesses:
     DS 30
+
 ; The corresponding hints
 guesses_hints:
     DS 30
 
-; Message timeout
+; Message timeout (remaining number of frames)
 message_timeout:
     DB
 
-; Horizontal position of the letter selection
+; Horizontal position of the letter selection within the alphabet grid
 selected_letter_x:
     DB
 
-; Vertical position of the letter selection
+; Vertical position of the letter selection within the alphabet grid
 selected_letter_y:
     DB
 

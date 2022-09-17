@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+To fit the whole game into one memory bank, the dictionary is compressed.
+Since only 2^5 combinations are needed to store 26 letters,
+5 bits would be enough; for simplicity's sake, however, we take 6.
+This way we can reduce the memory consumption by 20%.
+"""
+
 import struct
 
 def compress(in_path: str, out_path:str):

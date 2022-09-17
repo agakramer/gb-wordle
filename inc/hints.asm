@@ -1,6 +1,18 @@
-; Update the character hint objects
+;; ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+;; ██░██░██▄██░▄▄▀█▄░▄█░▄▄██
+;; ██░▄▄░██░▄█░██░██░██▄▄▀██
+;; ██░██░█▄▄▄█▄██▄██▄██▄▄▄██
+;; ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+;; Manages the obtained hints
+
+
+; Updates the background layer with the obtained hints.
+; Note: a row within the background map consists of 32 tiles
+; -> [guesses_hints]
+; <- [BKG_LOC_9800]
 update_hint_markings:
-    ld  hl, BKG_LOC_9800 + 20*32 + 6
+    ; calculate the
+    ld  hl, BKG_LOC_9800 + 32*20 + 6
     ld  de, guesses_hints
     
     ld  b, 6
@@ -30,8 +42,13 @@ update_hint_markings:
 
 
 
-; Update the hint data
+; Saves the obtained hints.
+; -> [current_word]
+; -> [current_guess]
+; -> [guess]
 mark_hints:
+    ; To get the beginning of the clues,
+    ; you can use the end of the guessing attempts
     call get_guess_offset
     push hl
     pop de
@@ -40,6 +57,7 @@ mark_hints:
     
     ld  b, 0
 .loop:
+    ; update the hints char by char
     ld  a, [de]
     call hint_for_char
     ld  [hl], a
@@ -53,9 +71,10 @@ mark_hints:
 
 
 
-; Determines the hint for one character
-; <- a: character value to check  
-; <- b: index within the guess
+; Determines the hint for one character.
+; -> [current_word]
+; -> a: character value to check  
+; -> b: position within the guess
 hint_for_char:
     push hl
     push bc

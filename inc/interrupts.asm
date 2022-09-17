@@ -1,4 +1,12 @@
-; Interrupt handler for the vertical blanking
+;; ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+;; █▄░▄█░▄▄▀█▄░▄█░▄▄█░▄▄▀█░▄▄▀█░██░█▀▄▄▀█▄░▄█░▄▄██
+;; ██░██░██░██░██░▄▄█░▀▀▄█░▀▀▄█░██░█░▀▀░██░██▄▄▀██
+;; █▀░▀█▄██▄██▄██▄▄▄█▄█▄▄█▄█▄▄██▄▄▄█░█████▄██▄▄▄██
+;; ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+;; Handle hardware interrupts
+
+
+; Interrupt handler for the vertical blanking period
 int_vblank:
     push af
     ld  a, 1
@@ -11,7 +19,10 @@ int_vblank:
 ; Interrupt handler for the timer
 ;
 ; Getting random numbers is hard, here we read the vertical position of the scanline,
-; save them periodically and use them to get something.
+; save them periodically and use them to get something. This approach works,
+; but is not unbalanced because the y position only goes from 0 to 153.
+; To get around this, two values are stored as in a shift register
+; and not all bits of this are used when determining the random number.
 int_timer:
     push hl
     push af
@@ -26,7 +37,7 @@ int_timer:
     ld  hl, LCD_POSITION_REGISTER
     ld  a, [hl]
     
-    ; save the new number
+    ; save the old and new number
     ld  hl, random_number
     ld  [hl+], a
     ld  a, d

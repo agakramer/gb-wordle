@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+Even though I like Wordle, it becomes very exhausting to constantly
+use your brain while developing. That's why this tool exists.
+"""
+
 import random
 
 print("Welcome to this debug tool!")

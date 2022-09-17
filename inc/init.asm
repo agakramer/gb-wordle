@@ -1,4 +1,18 @@
-; Initialise everything for the main game state
+;; ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+;; █▄░▄█░▄▄▀██▄██▄░▄██▄██░▄▄▀█░███▄██▄▄░█░▄▄▀█▄░▄██▄██▀▄▄▀█░▄▄▀██
+;; ██░██░██░██░▄██░███░▄█░▀▀░█░███░▄█▀▄██░▀▀░██░███░▄█░██░█░██░██
+;; █▀░▀█▄██▄█▄▄▄██▄██▄▄▄█▄██▄█▄▄█▄▄▄█▄▄▄█▄██▄██▄██▄▄▄██▄▄██▄██▄██
+;; ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+;; Establish a defined initial state
+
+
+; Initialize everything for the main game state
+; <- [current_state]
+; <- [sub_state]
+; <- [BKG_POS_X_REGISTER]
+; <- [BKG_POS_Y_REGISTER]
+; <- [LCD_CONTROL_REGISTER]
+; <- [message_objs]
 init_state_menu:
     ld a, STATE_MENU
     ld [current_state], a
@@ -22,7 +36,17 @@ init_state_menu:
 
 
 
-; Initialise everything for help screen
+; Initialize everything for the help screen
+; <- [current_state]
+; <- [BKG_POS_X_REGISTER]
+; <- [BKG_POS_Y_REGISTER]
+; <- [WND_POS_X_REGISTER]
+; <- [WND_POS_Y_REGISTER]
+; <- [LCD_CONTROL_REGISTER]
+; <- [current_word]
+; <- [guess]
+; <- [guess_hints]
+; <- [message_objs]
 init_state_help:
     ld a, STATE_HELP
     ld [current_state], a
@@ -45,24 +69,27 @@ init_state_help:
     ld  a, $70
     ld  [WND_POS_Y_REGISTER], a
 
+    ; load the window data
     ld  hl, window_help
     call load_window_map
     
-    ; set a fixed game state
+    ; Set a fixed and actually impossible game state.
+    ; containing: [current_word], [guess] and [guess_hints]
+    ;
+    ; This is only possible because the memory space of these
+    ; three variables is located directly after each other.
     ld  hl, current_word
     ld  de, help_word
     ld  c, 65
-.set_gamestate:
+.copy_gamestate:
     ld  a, [de]
     ld  [hl], a
     inc de
     inc hl
     dec c
-    jp  nz, .set_gamestate
+    jp  nz, .copy_gamestate
 
-    ; This is only possible because the memory space of these
-    ; two variables is located directly after each other.
-
+    ; for the rest we can use the default functions
     call update_hint_markings
     call update_guess_objects
     
@@ -76,7 +103,21 @@ init_state_help:
 
 
 
-; Initialise everything for the main game state
+; Initialize everything for the main game state
+; <- [current_state]
+; <- [BKG_POS_X_REGISTER]
+; <- [BKG_POS_Y_REGISTER]
+; <- [WND_POS_X_REGISTER]
+; <- [WND_POS_Y_REGISTER]
+; <- [LCD_CONTROL_REGISTER]
+; <- [current_word]
+; <- [current_guess]
+; <- [current_char]
+; <- [guess]
+; <- [guess_hints]
+; <- [selected_letter_x]
+; <- [selected_letter_y]
+; <- [message_objs]
 init_state_game:
     ; set the current state
     ld a, STATE_GAME
@@ -105,7 +146,7 @@ init_state_game:
     ld  hl, window_game
     call load_window_map
     
-    ; initialise some more variables
+    ; initialize some more variables
     ld  a, 0
     ld  [selected_letter_x], a
     ld  [selected_letter_y], a
@@ -140,7 +181,9 @@ init_state_game:
 
 
 
-; Switches to the lost state
+; Switches to the state when the player has lost
+; <- [current_state]
+; <- [message_objs]
 init_state_lost:
     ld  a, STATE_LOST
     ld  [current_state], a    
@@ -149,7 +192,9 @@ init_state_lost:
 
 
 
-; Switches to the won state
+; Switches to the state when the player has won
+; <- [current_state]
+; <- [message_objs]
 init_state_won:
     ld  a, STATE_WON
     ld  [current_state], a
@@ -158,7 +203,10 @@ init_state_won:
 
 
 
-; Initialise the DMG color palettes
+; Initialize the DMG color palettes
+; <- [PALETTE_BKG_REGISTER]
+; <- [PALETTE_OBJ0_REGISTER]
+; <- [PALETTE_OBJ1_REGISTER]
 init_palettes:
     ld  a, %10010011
     ld  [PALETTE_BKG_REGISTER], a
@@ -168,7 +216,9 @@ init_palettes:
 
 
 
-; Load the tile data into the vram
+; Copy the tile data into the vram
+; -> [tiles]
+; <- [TLS_LOC_8000]
 load_tiles:
     ld  bc, tiles_start
     ld  hl, TLS_LOC_8000
@@ -189,7 +239,9 @@ load_tiles:
 
 
 
-; Load the background map into the vram
+; Copy the background map into the vram
+; -> [background]
+; <- [BKG_LOC_9800]
 load_background_map:
     ld  bc, background
     ld  hl, BKG_LOC_9800
@@ -210,8 +262,9 @@ load_background_map:
 
 
 
-; Load the window map into the vram
-; -> hl 
+; Copy a window map into the vram
+; -> hl: address of the desired window map
+; <- [WND_LOC_9C00]
 load_window_map:
     ld  bc, WND_LOC_9C00
     ld  d, 32

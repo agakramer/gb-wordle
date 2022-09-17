@@ -1,4 +1,17 @@
-; Check if the guess is valid
+;; ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+;; ██░███░██▄██░▄▄▀███▀▄▀█▀▄▄▀█░▄▄▀█░▄▀██▄██▄░▄██▄██▀▄▄▀█░▄▄▀██
+;; ██░█░█░██░▄█░██░███░█▀█░██░█░██░█░█░██░▄██░███░▄█░██░█░██░██
+;; ██▄▀▄▀▄█▄▄▄█▄██▄████▄███▄▄██▄██▄█▄▄██▄▄▄██▄██▄▄▄██▄▄██▄██▄██
+;; ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+;; Functions to be able to detect the end of the game.
+
+
+; Check if the guess attempt is valid
+; -> [guess]
+; -> [current_guess]
+; -> [current_char]
+; -> [obj_message]
+; <- a: whether the test is valid or not
 check_guess:
     push hl
     push af
@@ -14,7 +27,6 @@ check_guess:
 	; and then search after it.
     call compress_guess
     call find_guess
-    
     cp  a, 1
     jp  nz, .is_invalid
 
@@ -56,8 +68,10 @@ check_guess:
 
 
 
-; Check the win conditions
-; <- a
+; Check if guessed correctly and therefore won
+; -> [current_word]
+; -> [current_guess]
+; <- a: whether it is correct or not
 check_win:
 	call get_guess_offset
     ld  bc, current_word

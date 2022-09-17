@@ -1,6 +1,14 @@
+;; ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+;; █▄░▄█░▄▄▀█▀▄▄▀█░██░█▄░▄██
+;; ██░██░██░█░▀▀░█░██░██░███
+;; █▀░▀█▄██▄█░█████▄▄▄██▄███
+;; ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+;; Handles the player inputs
+
+
 ; Read the current input state
-; -> b: current keystates
-; -> c: changed keys since last read
+; <- b: current keystates
+; <- c: changed keys since last read
 read_input:
     di
 
@@ -42,7 +50,8 @@ read_input:
 
 
 
-; React on input within the menu
+; React to input within the menu
+; -> c: the changed keystate
 handle_input_menu:
 .check_movement:
     ld  a, c
@@ -54,9 +63,11 @@ handle_input_menu:
     ld  [sub_state], a
     and a, STATE_MENU_START
     jp  z, .switch_to_help
+
 .switch_to_start
     call show_message_menu_start
     jp  .check_confirm
+
 .switch_to_help
     call show_message_menu_help
     jp  .check_confirm
@@ -79,6 +90,8 @@ handle_input_menu:
 
 
 
+; React to input within the help screen
+; -> c: the changed keystate
 handle_input_help:
     ld  a, c
     and a, INPUT_START
@@ -89,8 +102,10 @@ handle_input_help:
 
 
 
-; React on input within the main game
-; <- c: changed keys since last read
+; React to input within the main game
+; -> c: the changed keystate
+; <- [selected_letter_x]
+; <- [selected_letter_y]
 handle_input_game:
     ld  a, [selected_letter_x]
     ld  d, a
@@ -178,22 +193,26 @@ handle_input_game:
 
 
 
-; React on input after a game round
+; React to input after a game round,
+; no matter if won or lost
+; -> c: the changed keystate
 handle_input_after:
     ld  a, c
     and a, INPUT_START
     jp  z, .nothing
     call init_state_game
     call clear_message
-
 .nothing
     ret
 
 
 
-; Add a character to the guess
+; Select a character and add it to the current guess
 ; -> d: x position of the cursor
 ; -> e: y position of the cursor
+; <- [current_guess]
+; <- [current_char]
+; <- [guesses]
 select_letter:
     push hl
     push af
@@ -243,7 +262,10 @@ select_letter:
 
 
 
-; Delete the last letter
+; Delete the last entered letter
+; <- [current_guess]
+; <- [current_char]
+; <- [guesses]
 delete_letter:
     push hl
     push af
@@ -280,6 +302,9 @@ delete_letter:
 
 
 ; Update the object data for the alphabet cursor
+; -> [selected_letter_x]
+; -> [selected_letter_y]
+; <- [obj_selected_letter]
 update_cursor_objects:
     ld  hl, obj_selected_letter
 

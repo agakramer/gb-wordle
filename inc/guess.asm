@@ -1,4 +1,14 @@
+;; ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+;; ██░▄▄░█░██░█░▄▄█░▄▄█░▄▄█░███░█▀▄▄▀█░▄▄▀█░█▀██
+;; ██░█▀▀█░██░█░▄▄█▄▄▀█▄▄▀█▄▀░▀▄█░██░█░▀▀▄█░▄▀██
+;; ██░▀▀▄██▄▄▄█▄▄▄█▄▄▄█▄▄▄██▄█▄███▄▄██▄█▄▄█▄█▄██
+;; ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+;; Manages and displays the guessing attempts
+
+
 ; Updates the objects of the entered characters
+; -> [guesses]
+; <- [obj_guess_letters]
 update_guess_objects:
     ld  hl, obj_guess_letters
     ld  de, guesses
@@ -20,9 +30,10 @@ update_guess_objects:
 
 
 ; Updates one line of entered characters
-; -> hl: position within obj data
-; -> de: position within the guesses data
+; -> hl: address of where to write obj data
+; -> de: address of the current guess
 ; -> a:  vertical screen position
+; <- [obj_guess_letters]
 update_guess_row:
     push hl
     push hl
@@ -31,14 +42,14 @@ update_guess_row:
 	; distance between objects
     ld  bc, 4
 
-    ; vertical positions
+    ; write all five vertical positions
     ld  [hl], a
 REPT 4
     add hl, bc
     ld  [hl], a
 ENDR
     
-    ; horizontal positions
+    ; write all five horizontal positions
     pop hl
     inc hl
     ld  a, $30
@@ -49,7 +60,7 @@ REPT 4
     ld  [hl], a
 ENDR
     
-    ; tile indices
+    ; write all five tile indices
     pop hl
     inc hl
     inc hl
@@ -62,7 +73,7 @@ REPT 4
     ld  [hl], a
 ENDR
     
-    ; palette info
+    ; write all five palette info
     pop hl
     inc hl
     inc hl
@@ -80,7 +91,8 @@ ENDR
 
 
 
-; Calculates the position of the current guess
+; Calculates the address of the current guess attempt, using the number of the attempt
+; -> [current_guess]: number of the current attempt
 ; <- hl
 get_guess_offset:
     ld  a, [current_guess]
