@@ -32,7 +32,7 @@ TILE_ENTER              EQU $1e
 TILE_RIGHT              EQU $1f
 TILE_MISPLACED          EQU $20
 TILE_WRONG              EQU $21
-TILE_SLASH              EQU $22
+TILE_ARROW              EQU $22
 
 
 
@@ -197,8 +197,8 @@ tile_misplaced:
     include "tiles/sign-misplaced.asm"
 tiles_wrong:
     include "tiles/sign-wrong.asm"
-tiles_slash:
-    include "tiles/sign-slash.asm"
+tiles_arrow:
+    include "tiles/sign-arrow.asm"
 tiles_logo:
     include "tiles/logo.asm"
 tiles_end:
