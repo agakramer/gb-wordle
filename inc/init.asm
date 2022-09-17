@@ -139,7 +139,7 @@ init_state_game:
     ; set the window position
     ld  a, 3
     ld  [WND_POS_X_REGISTER], a
-    ld  a, $70
+    ld  a, $68
     ld  [WND_POS_Y_REGISTER], a
     
     ; load the window data
@@ -268,7 +268,7 @@ load_background_map:
 load_window_map:
     ld  bc, WND_LOC_9C00
     ld  d, 32
-    ld  e, 4
+    ld  e, 5
 
 .loop:
     ld  a, [hl]
